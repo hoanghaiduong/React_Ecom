@@ -8,7 +8,7 @@ import Product from 'pages/admin/product/Product';
 import ViewProduct from 'pages/admin/product/ViewProduct';
 import EditProduct from 'pages/admin/product/EditProduct';
 import ViewProductGrid from 'pages/admin/product/ViewProductGrid';
-const routes = [
+const routeAdmin = [
     {
         path: '/admin', exact: true, name: 'Admin'
     },
@@ -43,5 +43,5 @@ const routes = [
         path: '/admin/maps', exact: true, name: 'Maps', component: Maps
     },
 ]
-export default routes;
+export default routeAdmin;
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-import routes from "routes/Admin/routes";
+import routeAdmin from "routes/Admin/routes";
 import Sidebar from "components/admin/Sidebar";
 import Footer from "components/admin/Footer";
 
@@ -11,7 +11,7 @@ const MasterLayout = () => {
             <div className="md:ml-64">
 
                 <Switch>
-                    {routes.map((route, idx) => {//lọc qua các phần tử
+                    {routeAdmin.map((route, idx) => {//lọc qua các phần tử
                         return route.component &&
                             <Route
                                 key={idx}
@@ -23,7 +23,7 @@ const MasterLayout = () => {
                                 )}
                             />;
                     })}
-                    {/* Tat ca Link co prefix la /admin mac dinh se vao /admin/dashboard */}
+                    {/* Tat ca Link co prefix la /admin mac dinh se vao /admin/dashboard*/}
                     <Redirect from="/admin" to="/admin/dashboard" />
                 </Switch>
                 <Footer />

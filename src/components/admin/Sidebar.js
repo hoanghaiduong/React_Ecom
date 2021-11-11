@@ -5,28 +5,73 @@ import { useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import Swal from "sweetalert2";
 import AdminNavbar from "./AdminNavbar";
+import axios from 'axios'
 export default function Sidebar() {
+    const GetAuthToken = localStorage.getItem("auth_token");
+    const GetAuthName = localStorage.getItem("auth_name");
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    })
     const [showSidebar, setShowSidebar] = useState("-left-64");
     const history = useHistory();
     const [navLinkTG, setnavLinkTG] = useState(false);
+    const [loading, setLoading] = useState(false);
     const handleLogout = (e) => {
         e.preventDefault();
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("auth_name");
         Swal.fire({
-            title: "Đang xử lý",
-            timer: 600,
-            didOpen: () => {
-                Swal.showLoading();
-                history.push("/login");
-            },
-        }).then(() => {
-            Swal.fire({ icon: "success", title: "Đăng xuất thành công" });
-        });
+            title: 'Bạn có muốn đăng xuất ?',
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: 'Có, Đăng Xuất!',
+            cancelButtonText: 'Không, Tôi muốn ở lại!',
+            reverseButtons: true,
+        }).then((response) => {
+            if (response.isConfirmed) {
+                setLoading(true);
+                axios.get("/sanctum/csrf-cookie").then(() => {
+                    axios.post('api/logout').then((res) => {
+                        const result = res.data;
+                        if (res.status === 200) {
+                            setLoading(false);
+                            Toast.fire({
+                                icon: 'success',
+                                title: result.message
+                            }).then(() => {
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('auth_name');
+                                history.replace('/');
+                            }).catch(() => {
+                                setLoading(false);
+                            })
+                        }
+                    }).catch((error) => {
+                        setLoading(false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: error.message
+                        })
+                    })
+                })
+            } else if (
+                response.dismiss === Swal.DismissReason.cancel
+            ) {
+                //nếu ấn huỷ
+            }
+        }).catch(() => {
+            setLoading(false);
+        })
     };
-    const GetAuth = localStorage.getItem("auth_token");
+
     var AuthLogOut = "";
-    if (GetAuth) {
+    if (GetAuthToken) {
         AuthLogOut = (
             <Button
                 ripple="dark"
@@ -97,9 +142,9 @@ export default function Sidebar() {
 
                                 >
                                     <Icon name="add_shopping_cart" size="2xl" />
-                                   Thêm Sản phẩm
+                                    Thêm Sản phẩm
                                 </NavLink>
-                               
+
 
                             </li>
                             <li className="rounded-lg mb-2 text-gray-700">
@@ -110,9 +155,9 @@ export default function Sidebar() {
 
                                 >
                                     <Icon name="format_list_bulleted" size="2xl" />
-                                   Sản phẩm
+                                    Sản phẩm
                                 </NavLink>
-                               
+
 
                             </li>
                             <li className="rounded-lg mb-2 text-gray-700">

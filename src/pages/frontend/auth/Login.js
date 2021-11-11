@@ -11,27 +11,13 @@ import DefaultNavbar from 'components/frontend/DefaultNavbar';
 import Container from 'components/frontend/login/Container';
 import Page from 'components/frontend/login/Page';
 import SimpleFooter from 'components/frontend/SimpleFooter';
-/* import setCookie from "components/SetCookie"; */
 import React, { useState } from "react";
 import { useHistory } from "react-router";
 import Swal from 'sweetalert2';
-/* import { app } from '../../../firebase'
-import firebase from 'firebase/compat/app'; */
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
 
 const Login = () => {
     const history = useHistory();
-    /*    const config = {
-           apiKey: "AIzaSyDD7Y5eelmdHmAW8xEwEcmMAFdZGVDzbSE",
-           authDomain: "thuongmaidientu-1211f.firebaseapp.com",
-           projectId: "thuongmaidientu-1211f",
-           storageBucket: "thuongmaidientu-1211f.appspot.com",
-           messagingSenderId: "1008396240937",
-           appId: "1:1008396240937:web:c4f4819834bfbac3e37438",
-           measurementId: "G-LJM6J3R796"
-       }
-       firebase.initializeApp(config)*/
+
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -67,7 +53,7 @@ const Login = () => {
         setLoading(true)
         e.preventDefault();
         axios.get('/sanctum/csrf-cookie')
-            .then((res) => {
+            .then(() => {
                 axios.post('api/login', data).then((res) => {
                     const result = res.data;
                     const auth_token = result.token;

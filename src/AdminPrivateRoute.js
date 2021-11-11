@@ -56,7 +56,6 @@ function AdminPrivateRoute({ ...rest }) {
             {
                 ({ props, location }) =>
                     stateAuth ? <MasterLayout {...props} /> : <Redirect to={{ pathname: '/login', state: { from: location } }} />
-
             }
         />
     );

@@ -34,41 +34,45 @@ export default function FrontendLayout() {
     }, [])
     return (
         <>
-            <div className="absolute w-full z-20">
+            <div className="absolute w-full z-50">
                 <NavbarHome />
             </div>
             <main>
                 <Switch>
-                    {PublicRoutes.map((route, idx) => {//lọc qua các phần tử
-                        return route.component &&
+                    {PublicRoutes.map((routeData, id) => {//lọc qua các phần tử
+                        return routeData.component &&
                             <Route
-                                key={idx}
-                                path={route.path}
-                                exact={route.exact}
-                                name={route.name}
+                                key={id}
+                                path={routeData.path}
+                                exact={routeData.exact}
+                                name={routeData.name}
                                 render={(props) => (
-                                    <route.component {...props} />
+                                    <routeData.component {...props} />
                                 )}
                             />;
                     })}
-                    {/* Tat ca Link co prefix la /admin mac dinh se vao /admin/dashboard */}
+                    {/* Tat ca Link co prefix la / mac dinh se vao / */}
                     <Redirect from="/" to="/" />
                 </Switch>
             </main>
             <DefaultFooter />
-            {showGoTop && (<div className="" onClick={handleClickTop} style={{ position: "fixed", bottom: 50, right: 50, transition: "all" }}>
-                <Button
-                    color="indigo"
-                    buttonType="outline"
-                    size="lg"
-                    rounded={true}
-                    block={false}
-                    iconOnly={true}
-                    ripple="dark"
-                >
-                    <Icon name="vertical_align_top" size="lg" />
-                </Button>
-            </div>)}
+
+            <>
+                {showGoTop && (<div className="" onClick={handleClickTop} style={{ position: "fixed", bottom: 50, right: 50, transition: "all" }}>
+                    <Button
+                        color="indigo"
+                        buttonType="outline"
+                        size="lg"
+                        rounded={true}
+                        block={false}
+                        iconOnly={true}
+                        ripple="dark"
+                    >
+                        <Icon name="vertical_align_top" size="lg" />
+                    </Button>
+                </div>)}
+            </>
+
         </>
     );
 }

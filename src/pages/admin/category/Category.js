@@ -10,6 +10,7 @@ import TabPane from "@material-tailwind/react/TabPane";
 import Textarea from "@material-tailwind/react/Textarea";
 import axios from "axios";
 import { useState } from "react";
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import Swal from "sweetalert2";
 export default function Category() {
     const Toast = Swal.mixin({
@@ -29,10 +30,15 @@ export default function Category() {
         name: "",
         slug: "",
         status: "",
+        featured: "",
+        popular: "",
         descrip: "",
         meta_title: "",
         meta_keyword: "",
+        name_icon: '',
         meta_descrip: "",
+        RateUp: '',
+        RateDown: '',
         error_list: [],
     });
     const handleInput = (e) => {
@@ -48,7 +54,12 @@ export default function Category() {
         name: categoryInput.name,
         slug: categoryInput.slug,
         status: categoryInput.status,
+        featured: categoryInput.featured,
+        popular: categoryInput.popular,
         descrip: categoryInput.descrip,
+        RateUp: categoryInput.RateUp,
+        RateDown: categoryInput.RateDown,
+        name_icon: categoryInput.name_icon,
         meta_title: categoryInput.meta_title,
         meta_keyword: categoryInput.meta_keyword,
         meta_descrip: categoryInput.meta_descrip,
@@ -66,10 +77,13 @@ export default function Category() {
                     name: "",
                     slug: "",
                     status: "",
+                    featured: "",
+                    popular: "",
                     descrip: "",
                     meta_title: "",
                     meta_keyword: "",
                     meta_descrip: "",
+                    name_icon: '',
                     error_list: [],
                 });
                 setLoading(false);
@@ -138,7 +152,18 @@ export default function Category() {
                             <Icon name="account_circle" size="lg" />
                             Thẻ Meta
                         </TabItem>
-
+                        <TabItem
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setOpenTab(3);
+                            }}
+                            ripple="light"
+                            active={openTab === 3 ? true : false}
+                            href="tabItem"
+                        >
+                            <Icon name="account_circle" size="lg" />
+                            Khác
+                        </TabItem>
                     </TabList>
 
                     <TabContent>
@@ -180,16 +205,40 @@ export default function Category() {
                                         error={categoryInput.error_list.descrip}
                                     />
                                 </div>
-                                <div className="col-start-1 col-end-3 px-4">
-                                    <Checkbox
-                                        color="green"
-                                        text="Hoạt động/Không hoạt động"
-                                        id="checkbox"
-                                        name="status"
-                                        onChange={handleInput}
-                                        value={categoryInput.status}
-                                        error={categoryInput.error_list.status}
-                                    />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ml-5 ">
+                                    <div className="col-span-1 lg:col-span-1">
+                                        <Checkbox
+                                            color="green"
+                                            text="Hoạt động/Không hoạt động"
+                                            id="checkbox"
+                                            name="status"
+                                            onChange={handleInput}
+                                            value={categoryInput.status}
+                                            error={categoryInput.error_list.status}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 lg:col-span-1">
+                                        <Checkbox
+                                            color="green"
+                                            text="Đặc sắc/Không đặc sắc"
+                                            id="checkbox"
+                                            name="featured"
+                                            onChange={handleInput}
+                                            value={categoryInput.featured}
+                                            error={categoryInput.error_list.featured}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 lg:col-span-1">
+                                        <Checkbox
+                                            color="green"
+                                            text="Phổ biến/Không phổ biến"
+                                            id="checkbox"
+                                            name="popular"
+                                            onChange={handleInput}
+                                            value={categoryInput.popular}
+                                            error={categoryInput.error_list.popular}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </TabPane>
@@ -228,6 +277,11 @@ export default function Category() {
                                         value={categoryInput.meta_keyword}
                                     />
                                 </div>
+                            </div>
+                        </TabPane>
+                        <TabPane active={openTab === 3 ? true : false}>
+                            <div className="px-4 mb-7 w-full">
+
                             </div>
                         </TabPane>
                     </TabContent>

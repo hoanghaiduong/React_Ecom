@@ -36,32 +36,30 @@ const NavbarHome = () => {
         }).then((response) => {
             if (response.isConfirmed) {
                 setLoading(true);
-                axios({
-                    url: 'api/logout',
-                    method: 'POST',
-                }).then((res) => {
-                    const result = res.data;
-                    if (res.status === 200) {
-                        setLoading(false);
-                        Toast.fire({
-                            icon: 'success',
-                            title: result.message
-                        }).then(() => {
-                            localStorage.removeItem('auth_token');
-                            localStorage.removeItem('auth_name');
-                            history.replace('/');
-                        }).catch(() => {
+                axios.get("/sanctum/csrf-cookie").then(() => {
+                    axios.post('api/logout').then((res) => {
+                        const result = res.data;
+                        if (res.status === 200) {
                             setLoading(false);
+                            Toast.fire({
+                                icon: 'success',
+                                title: result.message
+                            }).then(() => {
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('auth_name');
+                                history.replace('/');
+                            }).catch(() => {
+                                setLoading(false);
+                            })
+                        }
+                    }).catch((error) => {
+                        setLoading(false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: error.message
                         })
-                    }
-                }).catch((error) => {
-                    setLoading(false);
-                    Swal.fire({
-                        icon: 'error',
-                        title: error.message
                     })
                 })
-
             } else if (
                 response.dismiss === Swal.DismissReason.cancel
             ) {
