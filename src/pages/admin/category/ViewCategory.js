@@ -25,14 +25,17 @@ export default function ViewCategory() {
     const [categoryList, setCategoryList] = useState([]);
     useEffect(() => {
         axios.get("/api/view-category").then((res) => {
+            setLoading(false);
             const result = res.data;
             console.log(result.status);
             console.log(result.data);
             if (result.status === 200) {
                 setCategoryList(result.data);
             }
-            setLoading(false);
         });
+        return()=>{
+            setLoading(false);
+        }
     }, []);
 
     const deleteCategory = (e, id) => {

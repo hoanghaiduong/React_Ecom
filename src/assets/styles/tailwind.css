@@ -406,10 +406,8 @@ video {
 	grid-column: span 2 / span 2;
 }.col-span-1{
 	grid-column: span 1 / span 1;
-}.col-end-3{
-	grid-column-end: 3;
-}.col-start-1{
-	grid-column-start: 1;
+}.m-5{
+	margin: 1.25rem;
 }.mx-auto{
 	margin-left: auto;
 	margin-right: auto;
@@ -422,6 +420,9 @@ video {
 }.my-8{
 	margin-top: 2rem;
 	margin-bottom: 2rem;
+}.my-3{
+	margin-top: 0.75rem;
+	margin-bottom: 0.75rem;
 }.mx-2{
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
@@ -490,20 +491,18 @@ video {
 	margin-right: 1rem;
 }.mr-auto{
 	margin-right: auto;
-}.-mt-32{
-	margin-top: -8rem;
-}.mb-7{
-	margin-bottom: 1.75rem;
-}.-mt-10{
-	margin-top: -2.5rem;
-}.mb-5{
-	margin-bottom: 1.25rem;
-}.mt-32{
-	margin-top: 8rem;
 }.mt-24{
 	margin-top: 6rem;
-}.ml-5{
-	margin-left: 1.25rem;
+}.-mt-32{
+	margin-top: -8rem;
+}.mb-5{
+	margin-bottom: 1.25rem;
+}.mt-12{
+	margin-top: 3rem;
+}.-mt-10{
+	margin-top: -2.5rem;
+}.mb-7{
+	margin-bottom: 1.75rem;
 }.block{
 	display: block;
 }.inline-block{
@@ -548,12 +547,12 @@ video {
 	width: 14rem;
 }.w-40{
 	width: 10rem;
+}.w-16{
+	width: 4rem;
 }.w-96{
 	width: 24rem;
 }.w-screen{
 	width: 100vw;
-}.w-16{
-	width: 4rem;
 }.min-w-full{
 	min-width: 100%;
 }.min-w-0{
@@ -742,6 +741,8 @@ video {
 	padding-bottom: 8rem;
 }.pt-10{
 	padding-top: 2.5rem;
+}.pb-10{
+	padding-bottom: 2.5rem;
 }.pb-20{
 	padding-bottom: 5rem;
 }.pb-14{
@@ -833,6 +834,17 @@ video {
 }.outline-none{
 	outline: 2px solid transparent;
 	outline-offset: 2px;
+}.filter{
+	--tw-blur: var(--tw-empty,/*!*/ /*!*/);
+	--tw-brightness: var(--tw-empty,/*!*/ /*!*/);
+	--tw-contrast: var(--tw-empty,/*!*/ /*!*/);
+	--tw-grayscale: var(--tw-empty,/*!*/ /*!*/);
+	--tw-hue-rotate: var(--tw-empty,/*!*/ /*!*/);
+	--tw-invert: var(--tw-empty,/*!*/ /*!*/);
+	--tw-saturate: var(--tw-empty,/*!*/ /*!*/);
+	--tw-sepia: var(--tw-empty,/*!*/ /*!*/);
+	--tw-drop-shadow: var(--tw-empty,/*!*/ /*!*/);
+	filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }.transition-all{
 	transition-property: all;
 	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1408,8 +1420,6 @@ video {
 		width: 41.666667%;
 	}.md\:grid-cols-2{
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}.md\:grid-cols-3{
-		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}.md\:justify-start{
 		justify-content: flex-start;
 	}.md\:justify-between{

@@ -93,7 +93,7 @@ export default function Product() {
     arr_image && arr_image.forEach((i) => {
         formData.append('image', i);
     });
-    console.log(arr_image);
+
     formData.append('avatar', avatar);
     formData.append('category_id', productInput.category_id);
     formData.append('brand_id', productInput.brand_id);
@@ -158,7 +158,7 @@ export default function Product() {
 
         })
     }
-    console.log(picture.image);
+
     return (
         <>
             <div className="pt-14  px-3 md:px-8 h-auto">

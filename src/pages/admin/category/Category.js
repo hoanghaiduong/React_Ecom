@@ -1,18 +1,22 @@
-import Button from "@material-tailwind/react/Button";
-import Checkbox from "@material-tailwind/react/Checkbox";
-import Icon from "@material-tailwind/react/Icon";
-import Input from "@material-tailwind/react/Input";
-import Tab from "@material-tailwind/react/Tab";
-import TabContent from "@material-tailwind/react/TabContent";
-import TabItem from "@material-tailwind/react/TabItem";
-import TabList from "@material-tailwind/react/TabList";
-import TabPane from "@material-tailwind/react/TabPane";
-import Textarea from "@material-tailwind/react/Textarea";
+import { Button, Checkbox, Icon, Input, Textarea, Card, CardHeader } from "@material-tailwind/react";
 import axios from "axios";
-import { useState } from "react";
-import AcUnitIcon from '@mui/icons-material/AcUnit';
+import { useState, useEffect, forwardRef } from "react";
+import { Grid, Box, Typography, Pagination, CircularProgress, Backdrop, Tab, tabsClasses, TextField, FormControl, Autocomplete, FormControlLabel, Switch, Divider, Slide, Dialog, DialogTitle, Stack, Rating, useTheme, useMediaQuery, Select, MenuItem, InputLabel, Slider } from '@mui/material'
+import { TabContext, TabList, TabPanel, LoadingButton } from '@mui/lab'
 import Swal from "sweetalert2";
+import iconList from "./ListIcon";
+import CodeIcon from '@mui/icons-material/Code';
+import CategoryIcon from '@mui/icons-material/Category';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SaveIcon from '@mui/icons-material/Save';
+import MoreOutlinedIcon from '@mui/icons-material/MoreOutlined';
 export default function Category() {
+
+    /* Modal Responsive */
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+    /* End Modal Responsive */
+
     const Toast = Swal.mixin({
         toast: true,
         position: "top-end",
@@ -24,14 +28,71 @@ export default function Category() {
             toast.addEventListener("mouseleave", Swal.resumeTimer);
         },
     });
+    /* Modal */
+    const [fullWidth, setFullWidth] = useState(true);
+    const [maxWidth, setMaxWidth] = useState('sm');
+    const handleMaxWidthChange = (e) => {
+        setMaxWidth(
+            e.target.value,
+        );
+    };
+    const handleFullWidthChange = (e) => {
+        setFullWidth(e.target.checked);
+    };
+    const [open, setOpen] = useState(false);
+    const [idx, setIdx] = useState('');
+    const handleClose = () => {
+        setOpen(false);
+    };
+    /* End Modal */
+
     const [loading, setLoading] = useState(false);
-    const [openTab, setOpenTab] = useState(1);
+    /* Tabs */
+    const [tab, setTab] = useState('1');
+    const handleTab = (event, newValue) => {
+        setTab(newValue);
+    };
+    /* End Tabs */
+
+    /* Phân trang  */
+    //số bản ghi
+    const [page, setPage] = useState(1);//mặc định page 1
+    const [limit, setLimit] = useState(48);//100 limit /1 page 
+    const [pages, setPages] = useState(Math.ceil(iconList.length / limit));//18 pages
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const handleChangePage = (e, value) => {
+        setPage(value);
+        setCurrentPage(value);
+    };
+
+    const handleChangeLimit = (e) => {
+        setLimit(e.target.value);//ex 45
+        //vậy limit number g là 45 
+        setPages(Math.ceil(iconList.length / e.target.value));//total pages = total bản ghi(1890) / limit = 42 trang
+    };
+
+
+    const getPaginatedData = () => {
+        const startIndex = currentPage * limit - limit;//1.trang đầu = 1 * 100 - 100 = 0 // 2. 2 * 100-100 = 100 //ex setLimit 45==0
+        const endIndex = startIndex + limit;// trang kế tiếp  = 0 + 100= 100 //2. 100+100=200 //ex ==45
+        return iconList.slice(startIndex, endIndex);//1. iconList(0,100); //2. iconList(100,200); //ex (0,45)
+        //tiep theo chay iconList(100,200);
+    };
+    /* End phân trang Phân trang  */
+
+    const [searchValue, setSearchValue] = useState("");
+    const handleSearch = (e) => {
+        e.persist = () => { };
+        setSearchValue(e.target.value);
+    }
+
     const [categoryInput, setCategoryInput] = useState({
         name: "",
         slug: "",
-        status: "",
-        featured: "",
-        popular: "",
+        status: false,
+        featured: false,
+        popular: false,
         descrip: "",
         meta_title: "",
         meta_keyword: "",
@@ -39,10 +100,12 @@ export default function Category() {
         meta_descrip: "",
         RateUp: '',
         RateDown: '',
+        Rating: 0,
         error_list: [],
     });
+
     const handleInput = (e) => {
-        e.persist();
+        e.persist = () => { };
         const categoryName = e.target.name;
         const categoryValue = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
         setCategoryInput({
@@ -59,6 +122,7 @@ export default function Category() {
         descrip: categoryInput.descrip,
         RateUp: categoryInput.RateUp,
         RateDown: categoryInput.RateDown,
+        Rating: categoryInput.Rating,
         name_icon: categoryInput.name_icon,
         meta_title: categoryInput.meta_title,
         meta_keyword: categoryInput.meta_keyword,
@@ -84,6 +148,7 @@ export default function Category() {
                     meta_keyword: "",
                     meta_descrip: "",
                     name_icon: '',
+                    Rating: '',
                     error_list: [],
                 });
                 setLoading(false);
@@ -111,193 +176,458 @@ export default function Category() {
 
     };
 
-    if (loading) {
-        Swal.fire({
-            timer: 500,
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
+    /*
+       if (loading) {
+           return (
+               <Backdrop
+                   sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                   open={loading}
+                   onClick={handleClose}
+               >
+                   <CircularProgress color="inherit" />
+               </Backdrop>
+           ); 
+           Swal.fire({
+               timer:1500,
+               timerProgressBar:true,
+               didOpen:()=>{
+                   Swal.showLoading();
+               }
+           })
+       }
+    */
+    var ArrayIcon = "";
+    var results = [];
+
+    if (tab === '4') {
+        ArrayIcon = getPaginatedData().map((item, id) => {
+            if (searchValue.length > 0) {
+                results = iconList.filter(item => item.toLowerCase().match(searchValue)).map((item, id) => {
+                    return (
+                        <Grid item xs={4} sm={3} md={2} lg={1} key={id} >
+                            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', }}>
+                                <Button
+                                    color="blueGray"
+                                    buttonType="outline"
+                                    size="regular"
+                                    rounded={false}
+                                    block={true}
+                                    iconOnly={false}
+                                    ripple="dark"
+                                    onClick={() => {
+                                        setIdx(item);
+                                        setOpen(true);
+                                    }}
+                                >
+                                    <Icon name={item} size="5xl" />
+                                </Button>
+
+                            </Box>
+                        </Grid>
+                    );
+                });
             }
-        }).then(() => {
-            setLoading(false);
+            else {
+                return (
+                    <Grid item xs={4} sm={3} lg={1} md={2} key={id} >
+                        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', }}>
+                            <Button
+                                color="blueGray"
+                                buttonType="outline"
+                                size="regular"
+                                rounded={false}
+                                block={true}
+                                iconOnly={false}
+                                ripple="dark"
+                                onClick={() => {
+
+                                    setIdx(item);
+                                    setOpen(true);
+                                }}
+                            >
+                                <Icon name={item} size="5xl" />
+                            </Button>
+
+                        </Box>
+                    </Grid>
+                );
+            }
+
         })
     }
 
+    console.log(results.length);
+    console.log(categoryInput);
+    console.log(ArrayIcon.length);
     return (
-        <div className="pt-10 pb-28 px-3 md:px-8 sm:px-8 h-full">
-            <form onSubmit={submitCategory} id="CATEGORY_FORM">
-                <Tab className="z-0">
-                    <TabList color="blueGray" className="flex flex-col sm:flex-row">
-                        <TabItem
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setOpenTab(1);
-                            }}
-                            ripple="light"
-                            active={openTab === 1 ? true : false}
-                            href="tabItem"
-                        >
-                            <Icon name="language" size="lg" />
-                            Tạo Danh Mục
-                        </TabItem>
-                        <TabItem
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setOpenTab(2);
-                            }}
-                            ripple="light"
-                            active={openTab === 2 ? true : false}
-                            href="tabItem"
-                        >
-                            <Icon name="account_circle" size="lg" />
-                            Thẻ Meta
-                        </TabItem>
-                        <TabItem
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setOpenTab(3);
-                            }}
-                            ripple="light"
-                            active={openTab === 3 ? true : false}
-                            href="tabItem"
-                        >
-                            <Icon name="account_circle" size="lg" />
-                            Khác
-                        </TabItem>
-                    </TabList>
+        <div className="pt-10 pb-10 px-3 md:px-8 sm:px-8 h-full">
 
-                    <TabContent>
-                        <TabPane active={openTab === 1 ? true : false}>
-                            <div className="">
-                                <div className="px-4 mb-7 w-full">
-                                    <Input
-                                        outline
-                                        type="text"
-                                        color="lightBlue"
-                                        placeholder="Con sên URL"
-                                        name="slug"
-                                        onChange={handleInput}
-                                        value={categoryInput.slug}
-                                        error={categoryInput.error_list.slug}
-                                    />
-                                </div>
-                                <div className="px-4 mb-7 w-full">
-                                    <Input
-                                        outline
-                                        type="text"
-                                        color="lightBlue"
-                                        placeholder="Tên"
-                                        name="name"
-                                        onChange={handleInput}
-                                        value={categoryInput.name}
-                                        error={categoryInput.error_list.name}
-                                    />
-                                </div>
-                                <div className="px-4 mb-7 ">
-                                    <Textarea
-                                        color="lightBlue"
-                                        size="regular"
-                                        outline={true}
-                                        placeholder="Mô tả"
-                                        name="descrip"
-                                        onChange={handleInput}
-                                        value={categoryInput.descrip}
-                                        error={categoryInput.error_list.descrip}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ml-5 ">
-                                    <div className="col-span-1 lg:col-span-1">
-                                        <Checkbox
-                                            color="green"
-                                            text="Hoạt động/Không hoạt động"
-                                            id="checkbox"
-                                            name="status"
-                                            onChange={handleInput}
-                                            value={categoryInput.status}
-                                            error={categoryInput.error_list.status}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 lg:col-span-1">
-                                        <Checkbox
-                                            color="green"
-                                            text="Đặc sắc/Không đặc sắc"
-                                            id="checkbox"
-                                            name="featured"
-                                            onChange={handleInput}
-                                            value={categoryInput.featured}
-                                            error={categoryInput.error_list.featured}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 lg:col-span-1">
-                                        <Checkbox
-                                            color="green"
-                                            text="Phổ biến/Không phổ biến"
-                                            id="checkbox"
-                                            name="popular"
-                                            onChange={handleInput}
-                                            value={categoryInput.popular}
-                                            error={categoryInput.error_list.popular}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </TabPane>
-                        <TabPane active={openTab === 2 ? true : false}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="col-span-2 lg:col-span-1">
-                                    <Textarea
-                                        color="lightBlue"
-                                        size="sm"
-                                        outline={true}
-                                        placeholder="Tiêu đề (meta)"
-                                        name="meta_title"
-                                        onChange={handleInput}
-                                        value={categoryInput.meta_title}
-                                    />
-                                </div>
-                                <div className="col-span-2 lg:col-span-1">
-                                    <Textarea
-                                        color="lightBlue"
-                                        size="sm"
-                                        outline={true}
-                                        placeholder="Mô tả (meta)"
-                                        name="meta_descrip"
-                                        onChange={handleInput}
-                                        value={categoryInput.meta_descrip}
-                                    />
-                                </div>
-                                <div className="col-span-2">
-                                    <Textarea
-                                        color="lightBlue"
-                                        size="sm"
-                                        outline={true}
-                                        placeholder="Thẻ keyword(meta)"
-                                        name="meta_keyword"
-                                        onChange={handleInput}
-                                        value={categoryInput.meta_keyword}
-                                    />
-                                </div>
-                            </div>
-                        </TabPane>
-                        <TabPane active={openTab === 3 ? true : false}>
-                            <div className="px-4 mb-7 w-full">
+            <Card>
+                <Box sx={{ width: '100%', typography: 'body1' }}>
+                    <TabContext value={tab}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <TabList onChange={handleTab}
+                                variant="scrollable"
+                                scrollButtons
+                                allowScrollButtonsMobile
+                                sx={{
+                                    [`& .${tabsClasses.scrollButtons}`]: {
+                                        '&.Mui-disabled': { opacity: 0.3 },
+                                    },
+                                }}>
+                                <Tab
+                                    className="focus:outline-none"
+                                    icon={<CategoryIcon />}
+                                    label="Tạo Danh Mục"
+                                    value="1"
+                                />
+                                <Tab
+                                    className="focus:outline-none"
+                                    icon={<AssessmentIcon />}
+                                    label="Thẻ Meta"
+                                    value="2" />
+                                <Tab
+                                    className="focus:outline-none"
+                                    icon={<MoreOutlinedIcon />}
+                                    label="Mở rộng"
+                                    value="3" />
+                                <Tab
+                                    className="focus:outline-none"
+                                    icon={<CodeIcon />}
+                                    label="Icon"
+                                    value="4" />
+                            </TabList>
+                        </Box>
+                        <form /*  onSubmit={submitCategory} */ id="CATEGORY_FORM">
+                            <TabPanel value="1">
+                                <Box sx={{ flexShrink: 1 }}>
+                                    <Grid container spacing={3}>
+                                        <Grid item md={6} xs={12}>
+                                            <FormControl fullWidth  >
+                                                <TextField
+                                                    required
+                                                    label="URL Danh mục"
+                                                    name="slug"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.slug}
+                                                    error={categoryInput.error_list.slug}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={6} xs={12}>
+                                            <FormControl fullWidth >
+                                                <TextField
+                                                    required
+                                                    label="Tên"
+                                                    name="name"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.name}
+                                                    error={categoryInput.error_list.name}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={12} xs={12}>
+                                            <FormControl fullWidth >
+                                                <TextField
+                                                    required
+                                                    multiline
+                                                    rows={4}
+                                                    label="Tên"
+                                                    name="descrip"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.descrip}
+                                                    error={categoryInput.error_list.descrip}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={12} xs={12} sm={12}>
+                                            <FormControl fullWidth >
+                                                <Autocomplete
+                                                    id="country-select-demo"
+                                                    value={categoryInput.name_icon}
+                                                    onChange={(e, name_icon) => {
+                                                        setCategoryInput({ ...categoryInput, name_icon })
+                                                    }}
+                                                    options={iconList}
+                                                    autoHighlight
+                                                    getOptionLabel={(option) => option}
+                                                    renderOption={(props, option) => (
+                                                        <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                                                            <Icon name={option} size="5xl" />
+                                                            {option}
+                                                        </Box>
+                                                    )}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Chọn icon cho danh mục"
+                                                            inputProps={{
+                                                                ...params.inputProps,
+                                                                autoComplete: 'new-password', // disable autocomplete and autofill
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item lg={4} md={6} xs={12} sm={12} >
+                                            <Box sx={{ justifyContent: 'center' }}>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch checked={categoryInput.status} onChange={handleInput} name="status" />
+                                                    }
+                                                    label={categoryInput.status === true ? 'Hoạt động' : 'Không hoạt động'}
+                                                />
+                                            </Box>
+                                        </Grid>
+                                        <Grid item lg={4} md={6} xs={12} sm={12}>
+                                            <Box sx={{ justifyContent: 'center' }} >
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch checked={categoryInput.popular} onChange={handleInput} name="popular" />
+                                                    }
+                                                    label={categoryInput.popular === true ? 'Phổ Biến' : 'Không Phổ Biến'}
+                                                />
+                                            </Box>
+                                        </Grid>
+                                        <Grid item lg={4} md={6} xs={12} sm={12}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Switch checked={categoryInput.featured} onChange={handleInput} name="featured" />
+                                                }
+                                                label={categoryInput.featured === true ? 'Đặc Sắc' : 'Không Đặc Sắc'}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </TabPanel>
+                            <TabPanel value="2">
+                                <Box sx={{ flexShrink: 1 }}>
+                                    <Grid container spacing={3}>
+                                        <Grid item md={6} xs={12}>
+                                            <FormControl fullWidth >
+                                                <TextField
+                                                    required
+                                                    multiline
+                                                    rows={4}
+                                                    label="Tiêu đề (meta)"
+                                                    name="meta_title"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.meta_title}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={6} xs={12}>
+                                            <FormControl fullWidth >
+                                                <TextField
+                                                    required
+                                                    multiline
+                                                    rows={4}
+                                                    label="Mô tả (meta)"
+                                                    name="meta_descrip"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.meta_descrip}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item md={12} xs={12}>
+                                            <FormControl fullWidth >
+                                                <TextField
+                                                    required
+                                                    multiline
+                                                    rows={4}
+                                                    label="Thẻ keyword(từ khoá)"
+                                                    name="meta_keyword"
+                                                    onChange={handleInput}
+                                                    value={categoryInput.meta_keyword}
 
-                            </div>
-                        </TabPane>
-                    </TabContent>
-                    <Button
-                        color="blueGray"
-                        buttonType="filled"
-                        size="regular"
-                        rounded={false}
-                        block={false}
-                        iconOnly={false}
-                        ripple="light"
-                    >
-                        Tạo danh mục
-                    </Button>
-                </Tab>
-            </form>
-        </div>
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </TabPanel>
+                            <TabPanel value="3">
+                                <Box sx={{ flexGrow: 1 }} className="mb-5">
+                                    <Grid container columnSpacing={5}>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <InputLabel disabled>Chỉ số tăng (%)</InputLabel>
+                                            <Slider
+                                                aria-label="up"
+                                                name="RateUp"
+                                                valueLabelDisplay="auto"
+                                                step={10}
+                                                marks
+                                                min={0}
+                                                max={100}
+                                                value={categoryInput.RateUp}
+                                                onChange={handleInput}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <InputLabel disabled>Chỉ số giảm (%)</InputLabel>
+                                            <Slider
+                                                aria-label="down"
+                                                name="RateDown"
+                                                valueLabelDisplay="auto"
+                                                onChange={handleInput}
+                                                step={10}
+                                                value={categoryInput.RateDown}
+                                                marks
+                                                min={0}
+                                                max={100}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={12} md={12} >
+                                            <InputLabel disabled>Đánh giá có sẵn</InputLabel>
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                <Rating name="Rating" value={Number(categoryInput.Rating)} onChange={handleInput} size="large" />
+                                            </Box>
+
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </TabPanel>
+                        </form>
+
+                        <TabPanel value="4">
+                            <Box sx={{ flexGrow: 1 }} className="mb-5">
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={4} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id="demo-simple-select-label">Số lượng Icon</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={limit}
+                                                label="Số lượng Icon"
+                                                onChange={handleChangeLimit}
+                                            >
+                                                <MenuItem value={limit} disabled>{limit}</MenuItem>
+                                                <MenuItem value={48}>48</MenuItem>
+                                                <MenuItem value={72}>72</MenuItem>
+                                                <MenuItem value={96}>96</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} sm={8} md={6}>
+
+                                        <FormControl fullWidth  >
+                                            <TextField
+                                                required
+                                                label="Search"
+                                                value={searchValue}
+                                                onChange={handleSearch}
+                                            />
+                                        </FormControl>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                            <Box sx={{ flexGrow: 1 }}>
+                                <Grid container spacing={3}>
+                                    {results}
+                                    {ArrayIcon}
+                                </Grid>
+                                <Box >
+                                    <Dialog Dialog
+                                        open={open}
+                                        fullWidth={fullWidth}
+                                        maxWidth={maxWidth}
+
+                                        keepMounted
+                                        onClose={handleClose}
+                                        aria-describedby="dialog_with_id"
+                                    >
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <DialogTitle>{idx}</DialogTitle>
+                                            <FormControlLabel
+                                                sx={{ mt: 1 }}
+                                                control={
+                                                    <Switch checked={fullWidth} onChange={handleFullWidthChange} />
+                                                }
+                                                label="Full width"
+                                            />
+                                        </Box>
+                                        <div className="px-8 pb-6">
+
+                                            <Box noValidate
+                                                component="form"
+                                                sx={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    m: 'auto',
+                                                    width: '100%',
+                                                }}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel htmlFor="max-width">maxWidth</InputLabel>
+                                                    <Select
+                                                        autoFocus
+                                                        value={maxWidth}
+                                                        onChange={handleMaxWidthChange}
+                                                        label="Độ rộng"
+                                                        inputProps={{
+                                                            name: 'max-width',
+                                                            id: 'max-width',
+                                                        }}
+                                                        fullWidth
+                                                    >
+                                                        <MenuItem value={false}>false</MenuItem>
+                                                        <MenuItem value="xs">xs</MenuItem>
+                                                        <MenuItem value="sm">sm</MenuItem>
+                                                        <MenuItem value="md">md</MenuItem>
+                                                        <MenuItem value="lg">lg</MenuItem>
+                                                        <MenuItem value="xl">xl</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Box>
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                <Button className="m-5">
+                                                    <Icon name={idx} size="9xl" />
+                                                </Button>
+                                            </Box>
+                                            <div className="flex justify-center my-3">
+                                                <Button onClick={handleClose}
+                                                    color="teal"
+                                                    buttonType="outline"
+                                                    size="regular"
+                                                    rounded={false}
+                                                    block={false}
+                                                    iconOnly={false}
+                                                    ripple="dark"
+                                                >Tôi hiểu rồi
+                                                </Button>
+                                            </div>
+                                        </div>
+
+
+
+                                    </Dialog>
+                                </Box>
+                            </Box>
+
+                            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', }} className="mt-12">
+                                <Pagination count={pages} showFirstButton showLastButton page={page} /* value */ onChange={handleChangePage} />
+                            </Box>
+                        </TabPanel>
+
+                        <Box sx={{ flexGrow: 1, justifyContent: 'center', display: 'flex', }}>
+                            <LoadingButton
+                                onClick={submitCategory}
+                                endIcon={<SaveIcon />}
+                                loading={loading}
+                                loadingPosition="end"
+                                variant="outlined"
+                                className="focus:outline-none"
+                            >
+                                Lưu lại
+                            </LoadingButton>
+                        </Box>
+                    </TabContext>
+
+                </Box>
+            </Card>
+
+        </div >
     );
 }

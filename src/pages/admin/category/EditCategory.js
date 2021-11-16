@@ -1,18 +1,17 @@
-import React from "react";
-import Input from "@material-tailwind/react/Input";
-import Icon from "@material-tailwind/react/Icon";
-import Textarea from "@material-tailwind/react/Textarea";
-import Checkbox from "@material-tailwind/react/Checkbox";
-import { useState, useEffect } from "react";
-import Button from "@material-tailwind/react/Button";
+import { Card } from "@material-tailwind/react";
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import CategoryIcon from '@mui/icons-material/Category';
+import MoreOutlinedIcon from '@mui/icons-material/MoreOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab';
+import { Backdrop, Box, CircularProgress, Tab, tabsClasses, useMediaQuery, useTheme } from '@mui/material';
 import axios from "axios";
-import Swal from "sweetalert2";
-import Tab from "@material-tailwind/react/Tab";
-import TabList from "@material-tailwind/react/TabList";
-import TabItem from "@material-tailwind/react/TabItem";
-import TabContent from "@material-tailwind/react/TabContent";
-import TabPane from "@material-tailwind/react/TabPane";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router";
+import Swal from "sweetalert2";
+import EditInfoCate from "./EditInfoCate";
+import EditRateCate from "./EditRateCate";
+import EditSeoCate from "./EditSeoCate";
 export default function EditCategory(props) {
     const Toast = Swal.mixin({
         toast: true,
@@ -25,16 +24,44 @@ export default function EditCategory(props) {
             toast.addEventListener("mouseleave", Swal.resumeTimer);
         },
     });
-    const [openTab, setOpenTab] = useState(1);
-    const [loading, setLoading] = useState(true);
     const history = useHistory();
-    const [categoryInput, setCategoryInput] = useState([]);
+
+    const [loading, setLoading] = useState(false);
+
+    /* Tabs */
+    const [tab, setTab] = useState('1');
+    const handleTab = (event, newValue) => {
+        setTab(newValue);
+    };
+    /* End Tabs */
+
+    const [categoryInput, setCategoryInput] = useState({
+        name: "",
+        slug: "",
+        status: false,
+        featured: false,
+        popular: false,
+        descrip: "",
+        meta_title: "",
+        meta_keyword: "",
+        name_icon: '',
+        meta_descrip: "",
+        RateUp: '',
+        RateDown: '',
+        Rating: 0,
+        error_list: [],
+    });
+
     const category_id = props.match.params.id;
+
     const [errorList, setErrorList] = useState([]);
+
     useEffect(() => {
+        setLoading(true);
         axios
             .get(`/api/edit-category/${category_id}`)
             .then((res) => {
+                setLoading(false);
                 const result = res.data;
                 if (result.status === 200) {
                     setCategoryInput(result.category);
@@ -52,19 +79,35 @@ export default function EditCategory(props) {
                 setLoading(false);
             })
             .catch(() => { });
-    }, [props.match.params.id, history]);
+        return () => {
+            setLoading(false);
+        }
+    }, [category_id, history]);
     const handleInput = (e) => {
-        e.persist();
+        e.persist = () => { };
+        const categoryName = e.target.name;
+        const checkboxType = e.target.type;
+        const checkboxValue = e.target.checked === true ? 1 : 0;
+        const categoryValue = e.target.value;
         setCategoryInput({
             ...categoryInput,
-            [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
+            [categoryName]: checkboxType === 'checkbox' ? checkboxValue : categoryValue,
         });
     };
+    const ArrayIcon = (e, newValue) => {
+        e.persist = () => { };
+        setCategoryInput({
+            ...categoryInput,
+            name_icon: newValue
+        })
+    }
     const data = categoryInput;
     const updateCategory = (e) => {
         e.preventDefault();
+        setLoading(true);
         axios.put(`/api/update-category/${category_id}`, data).then((res) => {
             const result = res.data;
+            setLoading(false);
             if (result.status === 200) {
                 Toast.fire({
                     icon: "success",
@@ -72,13 +115,16 @@ export default function EditCategory(props) {
                 })
                 setErrorList([]);
             } else if (result.status === 422) {
+                setLoading(false);
                 setErrorList(result.error_list);
                 Swal.fire({
                     icon: "error",
                     title: "Vui lồng kiểm tra đầu dữ liệu nhập",
                 });
+
                 //lỗi validate
             } else if (result.status === 404) {
+                setLoading(false);
                 Swal.fire({
                     icon: "error",
                     title: result.message,
@@ -86,153 +132,84 @@ export default function EditCategory(props) {
                     history.push('/admin/view-category');
                 });
             }
+        }).catch(() => {
+            setLoading(false);
         });
     };
+
+    let load = "";
     if (loading) {
-        Swal.fire({
-            timer: 100,
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-        });
+        load = (<Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+        >
+            <CircularProgress color="inherit" />
+        </Backdrop>
+        )
     }
     return (
         <>
+            {load && load}
             <div className="pt-10 pb-28 px-3 md:px-8 sm:px-8 h-full">
-                <form onSubmit={updateCategory}>
-                    <Tab className="z-0">
-                        <TabList color="blueGray" className="flex flex-col sm:flex-row">
-                            <TabItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setOpenTab(1);
-                                }}
-                                ripple="light"
-                                active={openTab === 1 ? true : false}
-                                href="tabItem"
-                            >
-                                <Icon name="language" size="lg" />
-                                Sửa Danh Mục
-                            </TabItem>
-                            <TabItem
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setOpenTab(2);
-                                }}
-                                ripple="light"
-                                active={openTab === 2 ? true : false}
-                                href="tabItem"
-                            >
-                                <Icon name="account_circle" size="lg" />
-                                Thẻ Meta
-                            </TabItem>
-                        </TabList>
+                <Card>
+                    <Box sx={{ width: '100%', typography: 'body1' }}>
+                        <TabContext value={tab}>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <TabList onChange={handleTab}
+                                    variant="scrollable"
+                                    scrollButtons
+                                    allowScrollButtonsMobile
+                                    sx={{
+                                        [`& .${tabsClasses.scrollButtons}`]: {
+                                            '&.Mui-disabled': { opacity: 0.3 },
+                                        },
+                                    }}>
+                                    <Tab
+                                        className="focus:outline-none"
+                                        icon={<CategoryIcon />}
+                                        label="Tạo Danh Mục"
+                                        value="1"
+                                    />
+                                    <Tab
+                                        className="focus:outline-none"
+                                        icon={<AssessmentIcon />}
+                                        label="Thẻ Meta"
+                                        value="2" />
+                                    <Tab
+                                        className="focus:outline-none"
+                                        icon={<MoreOutlinedIcon />}
+                                        label="Mở rộng"
+                                        value="3" />
 
-                        <TabContent>
-                            <TabPane active={openTab === 1 ? true : false}>
-                                <div className="">
-                                    <div className="px-4 mb-7 w-full">
-                                        <Input
-                                            outline
-                                            type="text"
-                                            color="lightBlue"
-                                            placeholder="Con sên URL"
-                                            name="slug"
-                                            onChange={handleInput}
-                                            value={categoryInput.slug}
-                                            error={errorList.slug}
-                                        />
-                                    </div>
-                                    <div className="px-4 mb-7 w-full">
-                                        <Input
-                                            outline
-                                            type="text"
-                                            color="lightBlue"
-                                            placeholder="Tên"
-                                            name="name"
-                                            onChange={handleInput}
-                                            value={categoryInput.name}
-                                            error={errorList.name}
-                                        />
-                                    </div>
-                                    <div className="px-4 mb-7 ">
-                                        <Textarea
-                                            color="lightBlue"
-                                            size="sm"
-                                            outline={true}
-                                            placeholder="Mô tả"
-                                            name="descrip"
-                                            onChange={handleInput}
-                                            value={categoryInput.descrip}
-                                            error={errorList.descrip}
-                                        />
-
-                                    </div>
-                                    <div className="col-start-1 col-end-3 px-4">
-                                        <Checkbox
-                                            color="green"
-                                            text="Hoạt động/Không hoạt động"
-                                            id="checkbox"
-                                            name="status"
-                                            onChange={handleInput}
-                                            value={categoryInput.status}
-                                            checked={categoryInput.status}
-                                        />
-                                    </div>
-                                </div>
-                            </TabPane>
-                            <TabPane active={openTab === 2 ? true : false}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Textarea
-                                            color="lightBlue"
-                                            size="sm"
-                                            outline={true}
-                                            placeholder="Tiêu đề (meta)"
-                                            name="meta_title"
-                                            onChange={handleInput}
-                                            value={categoryInput.meta_title}
-                                        />
-                                    </div>
-                                    <div className="col-span-2 lg:col-span-1">
-                                        <Textarea
-                                            color="lightBlue"
-                                            size="sm"
-                                            outline={true}
-                                            placeholder="Mô tả (meta)"
-                                            name="meta_descrip"
-                                            onChange={handleInput}
-                                            value={categoryInput.meta_descrip}
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Textarea
-                                            color="lightBlue"
-                                            size="sm"
-                                            outline={true}
-                                            placeholder="Thẻ keyword(meta)"
-                                            name="meta_keyword"
-                                            onChange={handleInput}
-                                            value={categoryInput.meta_keyword}
-                                        />
-                                    </div>
-                                </div>
-                            </TabPane>
-                        </TabContent>
-                        <Button
-                            color="blueGray"
-                            buttonType="filled"
-                            size="regular"
-                            rounded={false}
-                            block={false}
-                            iconOnly={false}
-                            ripple="light"
-                        >
-                            Cập nhật danh mục
-                        </Button>
-                    </Tab>
-                </form>
+                                </TabList>
+                            </Box>
+                            <form id="CATEGORY_FORM">
+                                <TabPanel value="1">
+                                    <EditInfoCate
+                                        dataComponent={{ categoryInput, handleInput, errorList, ArrayIcon }} />
+                                </TabPanel>
+                                <TabPanel value="2">
+                                    <EditSeoCate dataComponent={{ categoryInput, handleInput, errorList, ArrayIcon }} />
+                                </TabPanel>
+                                <TabPanel value="3">
+                                    <EditRateCate dataComponent={{ categoryInput, handleInput, errorList, ArrayIcon }} />
+                                </TabPanel>
+                                <Box sx={{ flexGrow: 1, justifyContent: 'center', display: 'flex', }}>
+                                    <LoadingButton
+                                        onClick={updateCategory}
+                                        endIcon={<SaveIcon />}
+                                        loading={loading}
+                                        loadingPosition="end"
+                                        variant="outlined"
+                                        className="focus:outline-none"
+                                    >
+                                        Cập nhật
+                                    </LoadingButton>
+                                </Box>
+                            </form>
+                        </TabContext>
+                    </Box>
+                </Card>
             </div>
         </>
     );

@@ -60,6 +60,7 @@ export default function ViewProduct() {
             field: `category_id`,
             headerName: 'Tên Danh Mục',
             width: 220,
+            filterable: true,
             headerAlign: 'center',
             renderCell: (category) => {
                 return (
@@ -154,9 +155,12 @@ export default function ViewProduct() {
                             block={true}
                             ripple="dark"
                         >
+
                             <DropdownItem color="lightBlue" ripple="light">
-                                <Icon name="visibility" size="md" />
-                                <span className="ml-2">Xem chi tiết</span>
+                                <Link to={`edit-product/${idPr}`} className="flex flex-row items-center">
+                                    <Icon name="visibility" size="md" />
+                                    <span className="ml-2">Xem chi tiết</span>
+                                </Link>
                             </DropdownItem>
 
                             <DropdownItem color="teal" ripple="light">
@@ -165,14 +169,12 @@ export default function ViewProduct() {
                                     <span className="ml-2">Sửa</span>
                                 </Link>
                             </DropdownItem>
-
-                            <Link>
-                                <DropdownItem color="red" ripple="light">
+                            <DropdownItem color="red" ripple="light">
+                                <Link to="#" className="flex flex-row items-center">
                                     <Icon name="delete_outline" size="md" />
-
                                     <span className="ml-2">Xoá</span>
-                                </DropdownItem>
-                            </Link>
+                                </Link>
+                            </DropdownItem>
                         </Dropdown>
                     </>
                 );
